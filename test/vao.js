@@ -11,13 +11,13 @@ var vaoFunctions = {
   deleteVertexArray: 0
 }
 
-function reset() {
+function reset () {
   Object.keys(vaoFunctions).forEach(function (fn) {
     vaoFunctions[fn] = 0
   })
 }
 
-function spy(gl) {
+function spy (gl) {
   var ext = gl.getExtension(EXTENSION_NAME)
   if ('createVertexArray' in gl.constructor.prototype || ext) {
     Object.keys(vaoFunctions).forEach(function (fn) {
@@ -50,21 +50,25 @@ tape('vertex array object created when attributes given', function (t) {
   t.assert('boolean', typeof vaoState.hasNativeSupport)
   t.assert('boolean', typeof vaoState.hasExtensionSupport)
 
+  reset()
+
   if (vaoState.hasSupport === false) {
-    return t.skip()
+    t.skip('vaoState.hasSupport is false')
+    end()
+    return
   }
 
-  reset()
   test()
   end()
 
   function end () {
     regl.destroy()
-    t.assert(vaoFunctions.deleteVertexArray === 1, 'deleteVertexArray called once')
+    if (vaoState.hasSupport) {
+      t.assert(vaoFunctions.deleteVertexArray === 1, 'deleteVertexArray called once')
+    }
     createContext.destroy(gl)
     t.end()
   }
-
 
   function test () {
     var frag = [
@@ -117,23 +121,26 @@ tape('vertex array object never created when attributes are not given', function
   var regl = createREGL(gl)
   var vaoState = wrapVAOState(gl, regl.stats, {})
 
-  window.gl = gl
-
   t.assert('boolean', typeof vaoState.hasSupport)
   t.assert('boolean', typeof vaoState.hasNativeSupport)
   t.assert('boolean', typeof vaoState.hasExtensionSupport)
 
+  reset()
+
   if (vaoState.hasSupport === false) {
-    return t.skip()
+    t.skip('vaoState.hasSupport is false')
+    end()
+    return
   }
 
-  reset()
   test()
   end()
 
   function end () {
     regl.destroy()
-    t.assert(vaoFunctions.deleteVertexArray === 0, 'deleteVertexArray never called')
+    if (vaoState.hasSupport) {
+      t.assert(vaoFunctions.deleteVertexArray === 0, 'deleteVertexArray never called')
+    }
     createContext.destroy(gl)
     t.end()
   }
